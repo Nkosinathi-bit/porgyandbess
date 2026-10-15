@@ -8,6 +8,29 @@ A theatre-inspired presentation with 13 scenes, curtain transitions, keyboard na
 
 [Hosted presentation](https://porgyandbess.netlify.app/)
 
+## Visual preview
+
+Actual Chromium browser captures of the running site. The opening screen and creative-team scene are shown. 
+
+![Porgy and Bess interactive presentation — desktop browser screenshot](docs/screenshots/desktop.jpg)
+
+
+<details>
+<summary>Creative-team scene preview</summary>
+
+![Interactive creative-team scene](docs/screenshots/creative.jpg)
+
+</details>
+
+<details>
+<summary>Mobile browser preview</summary>
+
+<img src="docs/screenshots/mobile.jpg" alt="Porgy and Bess interactive presentation — mobile browser screenshot" width="300">
+
+</details>
+
+Desktop: 1440 × 1000 · Mobile: 390 × 844. [Capture source and provenance](docs/screenshots/capture.json).
+
 ## Run locally
 
 ~~~bash
@@ -44,3 +67,4 @@ To connect recordings, add appropriately permitted files at the paths already sp
 | .github/ | Browser checks |
 
 Google Fonts are optional external resources. The technical demo can use the browser's fallback fonts.
+

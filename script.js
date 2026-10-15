@@ -1,7 +1,7 @@
 /* ============================================================
    WEB AUDIO ENGINE
    ============================================================ */
-const Audio = (function () {
+const StageAudio = (function () {
   let ctx = null;
   function init() {
     if (!ctx) {
@@ -164,13 +164,13 @@ const Curtain = (function () {
   function unlock() {
     if (audioUnlocked) return;
     audioUnlocked = true;
-    Audio.init();
-    Audio.orchestraTune();
+    StageAudio.init();
+    StageAudio.orchestraTune();
   }
   document.addEventListener('click', unlock, { once: true });
   document.addEventListener('keydown', unlock, { once: true });
 
-  setTimeout(() => { try { Audio.init(); Audio.orchestraTune(); } catch (e) {} }, 400);
+  setTimeout(() => { try { StageAudio.init(); StageAudio.orchestraTune(); } catch (e) {} }, 400);
 
   letters.forEach((span, i) => {
     setTimeout(() => span.classList.add('on'), 300 + i * 180);
@@ -197,8 +197,8 @@ const Curtain = (function () {
   const overlay = document.getElementById('intro-overlay');
   const btn = document.getElementById('enter-btn');
   btn.addEventListener('click', () => {
-    Audio.init();
-    Audio.thump();
+    StageAudio.init();
+    StageAudio.thump();
     overlay.classList.add('hide');
     Curtain.open();
     setTimeout(() => { overlay.style.display = 'none'; }, 700);
@@ -291,7 +291,7 @@ function goTo(pageId, opts) {
   if (idx === currentIndex && !opts.force) return;
   animating = true;
 
-  Audio.tick();
+  StageAudio.tick();
   Curtain.close();
 
   // After curtain closed, switch page
@@ -391,7 +391,7 @@ document.querySelectorAll('.page').forEach(p => {
     const panel = evaluationPage.querySelector(`.tab-panel[data-panel="${target}"]`);
     if (panel) panel.classList.add('active');
 
-    Audio.tick();
+    StageAudio.tick();
   }, true); // capture phase
 })();
 
@@ -417,11 +417,11 @@ document.querySelectorAll('.page').forEach(p => {
     });
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
   }
-  nextBtnW.addEventListener('click', () => { current = (current + 1) % total; update(); Audio.tick(); });
-  prevBtnW.addEventListener('click', () => { current = (current - 1 + total) % total; update(); Audio.tick(); });
+  nextBtnW.addEventListener('click', () => { current = (current + 1) % total; update(); StageAudio.tick(); });
+  prevBtnW.addEventListener('click', () => { current = (current - 1 + total) % total; update(); StageAudio.tick(); });
   dots.forEach(d => d.addEventListener('click', () => { current = parseInt(d.dataset.index, 10); update(); }));
   cards.forEach((card, i) => {
-    card.addEventListener('click', () => { if (i !== current) { current = i; update(); Audio.tick(); } });
+    card.addEventListener('click', () => { if (i !== current) { current = i; update(); StageAudio.tick(); } });
   });
   update();
 })();
@@ -450,6 +450,12 @@ document.querySelectorAll('.page').forEach(p => {
     currentCard = null;
   }
   document.querySelectorAll('.song-card').forEach(card => {
+    card.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.click();
+      }
+    });
     card.addEventListener('click', () => {
       const wasPlaying = card === currentCard && currentAudio && !currentAudio.paused;
       document.querySelectorAll('.song-card').forEach(c => c.classList.remove('open'));
@@ -457,8 +463,8 @@ document.querySelectorAll('.page').forEach(p => {
       if (wasPlaying) return;
       card.classList.add('open');
       const src = card.dataset.audio;
-      if (!src) return;
-      const audio = new Audio();
+      if (!src || card.dataset.audioAvailable === "false") return;
+      const audio = new window.Audio();
       audio.src = src; audio.volume = 0.7;
       currentAudio = audio; currentCard = card;
       let fellBack = false;
@@ -473,7 +479,7 @@ document.querySelectorAll('.page').forEach(p => {
           '5': [659.25, 587.33, 523.25, 493.88, 440]
         };
         const seq = phrases[card.dataset.song] || [440, 523.25, 659.25];
-        seq.forEach((f, i) => Audio.note(f, 0.9, 'triangle', 0.16, i * 0.55));
+        seq.forEach((f, i) => StageAudio.note(f, 0.9, 'triangle', 0.16, i * 0.55));
         card.classList.add('playing');
         playTimer = setTimeout(stopAll, PLAY_LIMIT_MS);
       });
@@ -531,7 +537,7 @@ document.querySelectorAll('.page').forEach(p => {
     wrap.appendChild(measure);
     notesWrap.querySelectorAll('.score-note').forEach(dot => {
       dot.addEventListener('mouseenter', () => {
-        Audio.note(parseFloat(dot.dataset.freq), 0.6, 'triangle', 0.18);
+        StageAudio.note(parseFloat(dot.dataset.freq), 0.6, 'triangle', 0.18);
         dot.classList.add('active');
         setTimeout(() => dot.classList.remove('active'), 400);
       });
@@ -541,7 +547,7 @@ document.querySelectorAll('.page').forEach(p => {
       wrap.classList.add('playing');
       phrase.notes.forEach((n, i) => {
         const dot = notesWrap.children[i];
-        Audio.note(n.f, 0.85, 'triangle', 0.16, i * 0.55);
+        StageAudio.note(n.f, 0.85, 'triangle', 0.16, i * 0.55);
         setTimeout(() => {
           dot.classList.add('active');
           setTimeout(() => dot.classList.remove('active'), 500);
@@ -799,7 +805,7 @@ const NeuralWeb = (function () {
     const syn = candidates[Math.floor(Math.random() * candidates.length)];
     const sourceKey = nodeKey === syn.from ? syn.from : syn.to;
     const targetKey = nodeKey === syn.from ? syn.to : syn.from;
-    Audio.pulse();
+    StageAudio.pulse();
     flashNeuron(sourceKey);
     setCaption(syn.title, syn.text);
     sendPulse(syn.id, sourceKey, targetKey);
@@ -808,7 +814,7 @@ const NeuralWeb = (function () {
   function randomPulse() {
     if (!active) return;
     const syn = pickRandomSynapse();
-    Audio.pulse();
+    StageAudio.pulse();
     flashNeuron(syn.from);
     setCaption(syn.title, syn.text);
     sendPulse(syn.id, syn.from, syn.to);
@@ -846,7 +852,7 @@ const NeuralWeb = (function () {
     item.addEventListener('click', () => {
       document.querySelectorAll('.timeline-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
-      Audio.tick();
+      StageAudio.tick();
     });
   });
 })();
@@ -859,7 +865,7 @@ const NeuralWeb = (function () {
   document.querySelectorAll('.note-item[data-note]').forEach(item => {
     item.addEventListener('click', () => {
       const seq = samples[item.dataset.note] || [];
-      seq.forEach((f, i) => Audio.note(f, 0.35, 'triangle', 0.18, i * 0.25));
+      seq.forEach((f, i) => StageAudio.note(f, 0.35, 'triangle', 0.18, i * 0.25));
     });
   });
 })();
@@ -891,7 +897,7 @@ function onEndPage() {
   applausePlayed = true;
   const hint = document.getElementById('applause-hint');
   setTimeout(() => {
-    Audio.applause(7);
+    StageAudio.applause(7);
     if (hint) hint.classList.add('on');
   }, 800);
 }
